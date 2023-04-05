@@ -33,22 +33,32 @@ const createUser = async (req, res) => {
 
 const loginUser = async (req, res) => {
     try {
-        const userInfo = req.body;
+        let userInfo = req.body;
         const user = await Users.findOne({ email: userInfo.email });
-        const isPassMatched = await bcrypt.compare(userInfo.password, user.password);
-        if (!user || !isPassMatched) return res.status(400).json({ message: "Incorrect username or password" });
+
+        if (!user) return res.json({ message: "Incorrect username or password" })
+        const isPassMatched = await bcrypt.compare(userInfo.password, user?.password);
+        if (!isPassMatched) return res.json({ message: "Incorrect username or password" });
         const payload = {
             id: user._id,
             email: user.email
         }
 
         const token = jwt.sign(payload, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '3d' });
+
         delete userInfo.password;
-        userInfo.name = user.username;
+        userInfo.username = user.username;
+        userInfo.profile = user.profile;
+
+        res.cookie('token', token, {
+            maxAge: 1 * 24 * 60 * 60 * 1000, // 7d
+            httpOnly: false,
+        })
+
         res.json({
             success: true,
             message: 'Successfully logged in',
-            token: "Bearer " + token,
+            token,
             userInfo
         })
     } catch (error) {
@@ -60,4 +70,28 @@ const loginUser = async (req, res) => {
 }
 
 
-module.exports = { createUser, loginUser };
+const getUserCourses = async (req, res) => {
+    try {
+        const email = req.query.email;
+        const courses = await Users.findOne({ email }).populate('courses')
+
+        if (courses) {
+            res.json({
+                success: true,
+                message: 'Successfully got courses',
+                data: courses
+            })
+        }
+
+    } catch (error) {
+        console.log(error);
+        res.json({
+            success: false,
+            message: error.message
+        })
+    }
+}
+
+
+
+module.exports = { createUser, loginUser, getUserCourses };

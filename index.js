@@ -1,35 +1,58 @@
 require('dotenv').config();
 const express = require('express');
 const app = express();
-const cors = require('cors');
 const port = process.env.PORT || 5000;
+
+// INTERNAL IMPORT
 const userRoutes = require('./routes/userRoutes');
 const quizTopicsRoutes = require('./routes/quizTopicRoutes');
 const questionsRoutes = require('./routes/questionsRoutes');
+const statisticsRoutes = require('./routes/statisticsRoutes');
+const courseTopicsRoutes = require('./routes/courseTopicsRoutes');
+const instructorRoutes = require('./routes/instructorRoutes');
+const coursesRoutes = require('./routes/coursesRoutes');
+const paymentRoutes = require('./routes/paymentRoutes');
+
+// EXTERNAL IMPORT
+const cors = require('cors');
+const cookieParser = require('cookie-parser');
+const session = require('express-session');
 const passport = require('passport');
 require('./config/database');
 require('./config/passport');
 
 
 //---------------------MIDDLE WARES---------------------
-app.use(cors())
+app.use(cors({
+    origin: true,
+    credentials: true
+}))
 app.use(express.json())
+app.use(cookieParser('ABC'))
+// Passport middleware
+app.use(session({
+    secret: 'Hello world',
+    resave: false,
+    saveUninitialized: true
+}))
+
 app.use(express.urlencoded({ extended: true }))
 app.use(passport.initialize());
+app.use(passport.session());
 
 
 //------------------------ROUTES------------------------
 app.get('/', (req, res) => {
     res.send("API is running");
 });
-// user routes
 app.use('/', userRoutes);
 app.use('/', quizTopicsRoutes);
 app.use('/', questionsRoutes);
-// app.get('/quiz', passport.authenticate('jwt', { session: false }),
-//     function (req, res) {
-//         res.send({ success: true });
-//     })
+app.use('/', statisticsRoutes);
+app.use('/', courseTopicsRoutes);
+app.use('/', instructorRoutes);
+app.use('/', coursesRoutes);
+app.use('/', paymentRoutes);
 
 //---------------------ERROR HANDLING---------------------
 // ROUTE ERROR

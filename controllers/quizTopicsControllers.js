@@ -1,18 +1,7 @@
-const QuizTopics = require('../models/QuizTopicsModel');
+const QuizTopics = require('../models/quizTopicsModel');
 
 const getQuizTopics = async (req, res) => {
     try {
-        const { limit } = req.query;
-        if (limit) {
-            const quizTopics = await QuizTopics.aggregate(
-                [{ $sample: { size: 4 } }]
-            );
-            return res.json({
-                success: true,
-                message: "Successfully got the Topics",
-                quizTopics
-            })
-        }
         const quizTopics = await QuizTopics.find({});
         return res.json({
             success: true,
