@@ -50,10 +50,10 @@ const loginUser = async (req, res) => {
         userInfo.username = user.username;
         userInfo.profile = user.profile;
 
-        res.cookie('token', token, {
-            maxAge: 1 * 24 * 60 * 60 * 1000, // 7d
-            httpOnly: false,
-        })
+        // res.cookie('token', token, {
+        //     maxAge: 1 * 24 * 60 * 60 * 1000, // 7d
+        //     httpOnly: false,
+        // })
 
         res.json({
             success: true,
